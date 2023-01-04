@@ -8,8 +8,10 @@ import {deleteObject,getDownloadURL,ref,uploadBytesResumable} from "firebase/sto
 import { storage } from "../firebase";
 import { saveItem } from "../utils/firebaseFunction";
 import Remark from "./Remark";
-
-
+import { useTranslation } from "react-i18next";
+import { UserAuth } from "../context/AuthContext";
+import { async } from "@firebase/util";
+import { useNavigate } from 'react-router-dom';
 
 const Registration = () => {
   const [title, setTitle] = useState("");
@@ -24,6 +26,7 @@ const Registration = () => {
   const [msg, setMsg] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isShown, setIsShown] = useState(false);
+  const {logout} = UserAuth();
   
 
 
@@ -135,16 +138,43 @@ const Registration = () => {
     setHeight("");
   };
 
-  let handleReject=(value)=>{
+  let handleReject=()=>{
     setIsShown(current => !current);
-    alert(value)
+    setIsLoading(false);
+        clearData();
   }
 
+  let handleAlert=(data)=>{
+    setIsShown(current => !current);
+    setAlertStatus("danger")
+     setIsLoading(false);
+        setFields(true);
+        setMsg(`Reason : ${data}`)
+        setTimeout(() => {
+          setFields(false);
+        }, 4000);
+  }
+const navigate = useNavigate();
+  const handleLogout = async ()=>{
+    try {
+      await logout();
+      navigate('/');
+    } catch (e) {
+      console.log(e.message);
+    }
+  }
 
+  const { t } = useTranslation();
 
   return (
-    <div className="w-full min-h-screen flex items-center justify-center">
-    
+    <div>
+    <div className="flex justify-end">
+    <button onClick={handleLogout} className='bg-white mx-2 hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow'>
+        {t("Logout")}
+      </button>
+    </div>
+     
+      <div className="w-full min-h-screen flex items-center justify-center">
       <div className="w-[90%] md:w-[75%] border border-gray-300 rounded-lg p-4 flex flex-col items-center justify-center gap-4">
      
         {fields && (
@@ -169,7 +199,7 @@ const Registration = () => {
             required
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="Full Name"
+            placeholder={t("Full Name")}
             className="w-full h-full text-lg bg-transparent font-semibold outline-none border-none placeholder:text-gray-400 text-textColor"
           />
         </div>
@@ -179,14 +209,14 @@ const Registration = () => {
             className="outline-none w-full text-base border-b-2 border-gray-200 p-2 rounded-md cursor-pointer"
           >
             <option value="other" className="bg-white">
-              Select Category
+              {t("Select Category")}
             </option>
             
                 <option className="text-base border-0 outline-none capitalize bg-white text-headingColor">
-                  Male
+                  {t("Male")}
                 </option>
                 <option className="text-base border-0 outline-none capitalize bg-white text-headingColor">
-                  Female
+                  {t("Female")}
                 </option>
               
           </select>
@@ -202,7 +232,7 @@ const Registration = () => {
                     <div className="w-full h-full flex flex-col items-center justify-center">
                       <MdCloudUpload className="text-gray-500 text-3xl hover:text-gray-700" />
                       <p className="text-gray-500 text-3xl hover:text-gray-700">
-                        Upload Document
+                        {t("Upload Document")}
                       </p>
                     </div>
 
@@ -242,7 +272,7 @@ const Registration = () => {
             <input
               type="text"
               required
-              placeholder="Religion"
+              placeholder={t("Religion")}
               value={religion}
               onChange={(e) => setReligion(e.target.value)}
               className="w-full h-full text-lg bg-transparent outline-none border-none placeholder:text-gray-400 text-textColor"
@@ -254,7 +284,7 @@ const Registration = () => {
             <input
               type="text"
               required
-              placeholder="Age"
+              placeholder={t("Age")}
               value={age}
               onChange={(e) => setAge(e.target.value)}
               className="w-full h-full text-lg bg-transparent outline-none border-none placeholder:text-gray-400 text-textColor"
@@ -267,7 +297,7 @@ const Registration = () => {
             <input
               type="text"
               required
-              placeholder="Education"
+              placeholder={t("Education")}
               value={education}
               onChange={(e) => setEducation(e.target.value)}
               className="w-full h-full text-lg bg-transparent outline-none border-none placeholder:text-gray-400 text-textColor"
@@ -279,7 +309,7 @@ const Registration = () => {
             <input
               type="text"
               required
-              placeholder="Height"
+              placeholder={t("Height")}
               value={height}
               onChange={(e) => setHeight(e.target.value)}
               className="w-full h-full text-lg bg-transparent outline-none border-none placeholder:text-gray-400 text-textColor"
@@ -288,7 +318,7 @@ const Registration = () => {
         </div>
         <div className="relative flex py-5 items-center">
          <div className="flex-grow border-dashed border-t w-60 border-blue-600"></div>
-             <span className="flex-shrink mx-4 text-gray-400">For official use(r1)</span>
+             <span className="flex-shrink mx-4 text-gray-400">{t("For official use(r1)")}</span>
         <div className="flex-grow border-dashed border-t w-60 border-gray-400"></div>
           </div>
         <div className="flex items-center w-full">
@@ -298,7 +328,7 @@ const Registration = () => {
             className="ml-0 md:ml-auto w-full md:w-auto border-none outline-none bg-emerald-500 px-12 py-2 rounded-lg text-lg text-white font-semibold "
             onClick={saveDetails}
           >
-            Accept
+            {t("Accept")}
           </button>
           
           <button
@@ -306,19 +336,21 @@ const Registration = () => {
             className="ml-0 md:ml-auto w-full md:w-auto border-none outline-none bg-emerald-500 px-12 py-2 rounded-lg text-lg text-white font-semibold "
             onClick={handleReject}
           >
-            Reject
+            {t("Reject")}
           </button>
          
           
         </div>
         {isShown && (
         <div>
-          <Remark handleReject={handleReject}/>
+          <Remark handleAlert = {handleAlert}/>
         </div>
       )}
       </div>
      
     </div>
+    </div>
+    
     
   );
 };
