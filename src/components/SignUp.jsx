@@ -15,7 +15,7 @@ const Signup = () => {
     setError('');
     try {
       await createUser(email, password);
-      navigate('/account')
+      navigate('/')
     } catch (e) {
       setError(e.message);
       console.log(error);
@@ -51,6 +51,7 @@ const Signup = () => {
             className='border p-3'
             type='password'
           />
+          
         </div>
         <button className='border border-blue-500 bg-blue-600 hover:bg-blue-500 w-full p-4 my-2 text-white'>
           {t("Sign Up")}
